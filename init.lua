@@ -812,7 +812,13 @@ require('lazy').setup({
           --   end,
           -- },
         },
-        opts = {},
+        opts = {
+          completion = {
+            documentation = {
+              auto_show = true,
+            },
+          },
+        },
       },
       'folke/lazydev.nvim',
     },
