@@ -167,7 +167,7 @@ vim.opt.termguicolors = true
 if vim.g.neovide then
   -- Put anything you want to happen only in Neovide here
   vim.o.guifont = 'JetBrainsMono Nerd Font Mono:h12'
-  vim.g.neovide_cursor_vfx_mode = 'Railgun'
+  vim.g.neovide_cursor_vfx_mode = 'railgun'
 end
 
 -- Minimal number of screen lines to keep above and below the cursor.
