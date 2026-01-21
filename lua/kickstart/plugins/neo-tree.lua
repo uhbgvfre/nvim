@@ -20,6 +20,32 @@ return {
           ['\\'] = 'close_window',
         },
       },
+      event_handlers = {
+        {
+          event = 'file_added',
+          handler = function(path)
+            if path:match '%.cs$' then
+              vim.cmd 'Usync'
+            end
+          end,
+        },
+        {
+          event = 'file_moved',
+          handler = function(data)
+            if data.source:match '%.cs$' or data.destination:match '%.cs$' then
+              vim.cmd 'Usync'
+            end
+          end,
+        },
+        {
+          event = 'file_deleted',
+          handler = function(path)
+            if path:match '%.cs$' then
+              vim.cmd 'Usync'
+            end
+          end,
+        },
+      },
     },
   },
 }
