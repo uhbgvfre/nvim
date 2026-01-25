@@ -7,14 +7,33 @@
 
 return {
   {
-    'catppuccin/nvim',
-    name = 'catppuccin',
+    'rose-pine/neovim',
+    name = 'rose-pine',
     priority = 1000,
     config = function()
-      require('catppuccin').setup({
-        flavour = 'mocha', -- 可選: latte, frappe, macchiato, mocha
-      })
-      vim.cmd.colorscheme 'catppuccin'
+      require('rose-pine').setup {
+        variant = 'auto', -- auto, main, moon, or dawn
+        dark_variant = 'main', -- main, moon, or dawn
+        dim_inactive_windows = false,
+        extend_background_behind_borders = true,
+
+        styles = {
+          italic = false,
+        },
+
+        highlight_groups = {
+          IblIndent = { fg = 'overlay' }, -- 使非活動縮進線隱約可見
+          -- Rainbow Delimiters integration
+          RainbowDelimiterRed = { fg = 'love' },
+          RainbowDelimiterYellow = { fg = 'gold' },
+          RainbowDelimiterBlue = { fg = 'pine' },
+          RainbowDelimiterOrange = { fg = 'rose' },
+          RainbowDelimiterGreen = { fg = 'foam' },
+          RainbowDelimiterViolet = { fg = 'iris' },
+          RainbowDelimiterCyan = { fg = 'foam' },
+        },
+      }
+      vim.cmd.colorscheme 'rose-pine'
     end,
   },
 }
