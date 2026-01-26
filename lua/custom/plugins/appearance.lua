@@ -6,11 +6,11 @@ return {
     ---@type ibl.config
     opts = {
       indent = {
-        char = '╎', -- 居中的虛垂直線，讓非活動縮進隱約可見
+        char = '▏',
       },
       scope = {
         enabled = true,
-        char = '│', -- 活動 Scope 使用居中的細實垂直線
+        char = '▏',
         show_start = true,
         show_end = false,
         injected_languages = true,
@@ -44,6 +44,9 @@ return {
           'toggleterm',
           'lazyterm',
         },
+      },
+      whitespace = {
+        remove_blankline_trail = true,
       },
     },
     config = function(_, opts)
