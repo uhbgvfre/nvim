@@ -430,15 +430,26 @@ require('lazy').setup({
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
+      local is_unity = function()
+        local cwd = vim.fn.getcwd()
+        return vim.fn.isdirectory(cwd .. '/Assets') == 1 and vim.fn.isdirectory(cwd .. '/ProjectSettings') == 1
+      end
+
+      local ignore_patterns = { "%.meta$", "%.DS_Store", "node_modules/.*" }
+      if is_unity() then
+        vim.list_extend(ignore_patterns, { "Library/.*", "Temp/.*", "Obj/.*", "Build/.*", "Logs/.*", "UserSettings/.*" })
+      end
+
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
+        defaults = {
+          file_ignore_patterns = ignore_patterns,
+          -- mappings = {
+          --   i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+          -- },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {

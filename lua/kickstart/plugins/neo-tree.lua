@@ -20,6 +20,25 @@ return {
           ['\\'] = 'close_window',
         },
       },
+      filtered_items = {
+        visible = false,
+        hide_dotfiles = true,
+        hide_gitignored = true,
+        hide_by_name = {
+          ".DS_Store",
+          "thumbs.db",
+          "node_modules",
+          "Library",
+          "Temp",
+          "Obj",
+          "Build",
+          "Logs",
+          "UserSettings",
+        },
+        hide_by_pattern = {
+          "*.meta",
+        },
+      },
     },
   },
 }
