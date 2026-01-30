@@ -170,7 +170,10 @@ vim.opt.termguicolors = true
 if vim.g.neovide then
   -- Put anything you want to happen only in Neovide here
   vim.o.guifont = 'JetBrainsMono Nerd Font:h12'
-  vim.g.neovide_cursor_vfx_mode = 'railgun'
+  vim.g.neovide_cursor_vfx_mode = 'pixiedust'
+  vim.g.neovide_cursor_vfx_particle_density = 3
+  -- vim.g.neovide_cursor_vfx_particle_phase = 8
+  -- vim.g.neovide_cursor_vfx_particle_curl = 0.1
 end
 
 -- Minimal number of screen lines to keep above and below the cursor.
@@ -249,6 +252,19 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Fix terminal background color persistence on exit
+vim.api.nvim_create_autocmd('VimLeave', {
+  callback = function()
+    -- 0m: 重設屬性
+    -- \27]111\7: 重設終端機背景色 (OSC 111)
+    -- \27]110\7: 重設終端機前景色 (OSC 110)
+    -- 39m, 49m: 確保回到預設前景/背景色
+    -- ?25h: 顯示游標
+    io.write('\27[0m\27]111\7\27]110\7\27[39m\27[49m\27[?25h')
+    io.flush()
+  end,
+})
+
 -- Set indentation for C# files specifically
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'cs',
@@ -256,7 +272,7 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.opt_local.shiftwidth = 4
     vim.opt_local.tabstop = 4
     vim.opt_local.softtabstop = 4
-    vim.opt_local.expandtab = false
+    vim.opt_local.expandtab = true
   end,
 })
 

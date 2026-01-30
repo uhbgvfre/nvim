@@ -18,9 +18,10 @@ return {
           wo = { wrap = true } -- Wrap notifications
         }
       },
-      scroll = { enabled = true },
+      scroll = { enabled = false },
       input = { enabled = true },
       select = { enabled = true },
+      animate = { enabled = false },
     },
     keys = {
       { "<leader>n",  function() Snacks.notifier.show_history() end, desc = "Notification History" },
