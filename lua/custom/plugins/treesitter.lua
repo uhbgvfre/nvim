@@ -1,6 +1,7 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "master",
     version = false, -- last release is way too old and doesn't work on Windows
     build = ":TSUpdate",
     event = { "VeryLazy" },
@@ -8,7 +9,7 @@ return {
     init = function(plugin)
       -- PERF: add nvim-treesitter queries to the rtp and it's also a generous way to lastly load it
       require("lazy.core.loader").add_to_rtp(plugin)
-      require("nvim-treesitter.query_predicates")
+      pcall(require, "nvim-treesitter.query_predicates")
     end,
     dependencies = {
       {
