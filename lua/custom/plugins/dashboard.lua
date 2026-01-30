@@ -1,160 +1,139 @@
 return {
-  'nvimdev/dashboard-nvim',
-  event = 'VimEnter',
-  config = function()
-    local header = {
-      [[                                                                ]],
-      [[                      -#@@@@@@@@@@@@@@@%+:                      ]],
-      [[                 .=@@@@@@@@@@@@@@@@@@@@@@@@%+:.                 ]],
-      [[               +@%*+=--+@@@@@@@@@@@@@@@@@@@@@@*::               ]],
-      [[             +=:::.........:#@@@@@@@@@@@@@@@@@@@*:.             ]],
-      [[           ...................-@@@@@@@@@@@@@@@@@@@:...          ]],
-      [[         .......................=@@@@@@@@@@@@@@@@@@-...         ]],
-      [[        .........................:#@@@@@@@@@@@@@@@@@-...        ]],
-      [[       ............................=@@@@@@@@@@@@@@@@@....       ]],
-      [[      ..............................-@@@@@@@@@@@@@@@@+...:      ]],
-      [[     ......:=#@@@@@@@@@@@@%*+-:......=@@@@@@@@@@@@@@@@....:     ]],
-      [[     ..:*@@@@@@@@@@@@@@@@@@@@@@@@@%-..*@@@@@@@@@@@@@@@:...-     ]],
-      [[    .=@@@@@@@@@@@%@%%@@%@@@%%@@@@@@@@@@@@@@@@@@@@@@@@@-...=-    ]],
-      [[    +@%%%%%%%%%%@%%%%%%%%%%%%%%@%%@@@@@@%@@@@@@@@@@@@@:...=%    ]],
-      [[    *%%%%%%%%@%%%%%%%%%%%%%%%%%%%%%@%@@@@%@@@@@@@@@@@@...:@%    ]],
-      [[    +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@%%@@@@@@@@@@+..:%@#    ]],
-      [[    :%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@%%@@@@@@@@@@::+@@@:    ]],
-      [[     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@%%%%@@@@@@@@-#@@@@@     ]],
-      [[     -%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@+     ]],
-      [[      *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@%%%%      ]],
-      [[                                                                ]],
-    }
+  -- 2. 配置 snacks.nvim Dashboard
+  {
+    'folke/snacks.nvim',
+    opts = {
+      dashboard = {
+        enabled = true,
+        width = 46, -- 稍微調寬，確保右側有足夠空間撐開
+        pane_gap = 1,
+        sections = {
+          -- 自定義 Header 邏輯
+          function()
+            local art = [[
+                .-+#@@@@@@@@@%*=:.                 
+            .+@@@@@@@@@@@@@@@@@@@@%-..             
+          -+-::.....:*@@@@@@@@@@@@@@@+:.           
+       .................#@@@@@@@@@@@@@@-...        
+      ....................*@@@@@@@@@@@@@*...       
+     ......................=%@@@@@@@@@@@@+...      
+    ......:-+******+-:......:#@@@@@@@@@@@@....     
+   ..:+@@@@@@@@@@@@@@@@@@@@*::#@@@@@@@@@@@-..:.    
+   -#@@@@@@@%%@%%%%%%%@@@@@@@@@@@@@@@@@@@@-..=-    
+   =%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@%:.:#+    
+   =#%%%%%%%%%%%%%%%%%%%%%%%%@@@%@@@@@@@@*.-%@=    
+   :*%%%%%%%%%%%%%%%%%%%%%%%%%@%%%@@@@@@%*@@@%:    
+    =#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@+     
+     -#%%%%%#**+=-:-*%%%%%%%%%%%%%%%%%%%%%%#=      
+      :++=:.......:#%%%%%%%%%%%%%%@@@@@@@@%-       
+       ..:::....::#%%%%%%%%%%%%%@@@@@@@@@=.        
+          .:....:*%%%%%%%%%%@@@**#%@%#+.           
+             ...:#%%%%%%%%%%@@@#-:::.              
+                ..-=++********+-..                 
+]]
+            local lines = vim.split(art, '\n')
+            local rows = {}
+            for _, line in ipairs(lines) do
+              if line:gsub('%s+', '') ~= '' then
+                local text_parts = {}
+                local current_chunk = ''
+                local last_hl = nil
 
-    require('dashboard').setup {
-      theme = 'doom',
-      config = {
-        header = header,
-        center = {
+                for i = 1, #line do
+                  local char = line:sub(i, i)
+                  local hl = 'SnacksDashboardHeader'
+
+                  if char == '@' then hl = 'MikasaGold'
+                  elseif char == '%' then hl = 'MikasaRose'
+                  elseif char:find '[#%*]' then hl = 'MikasaIris'
+                  elseif char:find '[%+=%-%:%.]' then hl = 'MikasaPine'
+                  end
+
+                  if hl == last_hl then
+                    current_chunk = current_chunk .. char
+                  else
+                    if current_chunk ~= '' then
+                      table.insert(text_parts, { current_chunk, hl = last_hl })
+                    end
+                    current_chunk = char
+                    last_hl = hl
+                  end
+                end
+                if current_chunk ~= '' then
+                  table.insert(text_parts, { current_chunk, hl = last_hl })
+                end
+                -- 將 align 改為 left 並維持適度縮進，可以減少左側空白
+                table.insert(rows, { text = text_parts, align = 'left', indent = 2 })
+              end
+            end
+            table.insert(rows, { text = '', padding = 1 })
+            return rows
+          end,
+          -- 右側 Widget
           {
-            icon = '󰈞  ',
-            desc = 'Find File          ',
-            action = 'Telescope find_files',
-            key = 'f',
-          },
-          {
-            icon = '󰊄  ',
-            desc = 'Recent Projects    ',
-            action = 'Telescope projects',
-            key = 'p',
-          },
-          {
-            icon = '󰭎  ',
-            desc = 'Text Search        ',
-            action = 'Telescope live_grep',
-            key = 'w',
-          },
-          {
-            icon = '  ',
-            desc = 'Edit Config        ',
-            action = function()
-              vim.api.nvim_set_current_dir(vim.fn.stdpath 'config')
-              require('telescope.builtin').find_files()
+            pane = 2,
+            gap = 1,
+            { section = 'keys', gap = 1, padding = 1, width = 30 }, -- 固定寬度 30
+            { text = '', padding = 1 }, -- 在 divider 上方加空行
+            { text = '──────────────────────────────', hl = 'MikasaIris', width = 30, align = 'center' }, -- 撐滿 30 寬並置中
+            { text = '', padding = 1 }, -- 在 divider 下方加空行
+            function()
+              local stats = require('lazy').stats()
+              local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+              local version = 'v' .. vim.version().major .. '.' .. vim.version().minor .. '.' .. vim.version().patch
+              return {
+                align = 'center', -- 文字置中
+                width = 30,
+                text = {
+                  { 'NVIM ', hl = 'MikasaGold' },
+                  { version, hl = 'MikasaGold' },
+                  { ' • ', hl = 'MikasaPine' },
+                  { '󰚥 ', hl = 'MikasaIris' },
+                  { stats.loaded .. '/' .. stats.count .. ' plugins in ', hl = 'MikasaRose' },
+                  { ms .. 'ms', hl = 'MikasaIris' },
+                },
+              }
             end,
-            key = 'c',
-          },
-          {
-            icon = '󰊳  ',
-            desc = 'Update Plugins     ',
-            action = 'Lazy update',
-            key = 'u',
           },
         },
-        footer = function()
-          local stats = require('lazy').stats()
-          local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
-          return {
-            '──────────────────────────────────────────────────────',
-            '',
-            '󰋚 NVIM v' .. vim.version().major .. '.' .. vim.version().minor .. '.' .. vim.version().patch .. '  •  󰚥 ' .. stats.loaded .. '/' .. stats.count .. 'plugins  •   ' .. ms .. 'ms',
-          }
-        end,
+        preset = {
+          keys = {
+            { icon = '󰈞 ', icon_hl = 'MikasaGold', key = 'f', key_hl = 'MikasaIris', desc = 'Find File', desc_hl = 'MikasaRose', action = ':Telescope find_files' },
+            { icon = '󰊄 ', icon_hl = 'MikasaGold', key = 'p', key_hl = 'MikasaIris', desc = 'Recent Projects', desc_hl = 'MikasaRose', action = ':Telescope projects' },
+            { icon = '󰭎 ', icon_hl = 'MikasaGold', key = 'w', key_hl = 'MikasaIris', desc = 'Text Search', desc_hl = 'MikasaRose', action = ':Telescope live_grep' },
+            {
+              icon = ' ',
+              icon_hl = 'MikasaGold',
+              key = 'c',
+              key_hl = 'MikasaIris',
+              desc = 'Edit Config',
+              desc_hl = 'MikasaRose',
+              action = function()
+                vim.api.nvim_set_current_dir(vim.fn.stdpath 'config')
+                require('telescope.builtin').find_files()
+              end,
+            },
+            { icon = '󰊳 ', icon_hl = 'MikasaGold', key = 'u', key_hl = 'MikasaIris', desc = 'Update Plugins', desc_hl = 'MikasaRose', action = ':Lazy update' },
+            { icon = ' ', icon_hl = 'MikasaGold', key = 'q', key_hl = 'MikasaIris', desc = 'Quit', desc_hl = 'MikasaRose', action = ':qa' },
+          },
+        },
       },
-    }
+    },
 
-    -- Custom coloring for the Mikasa volleyball in Rose Pine flavors
-    local mikasa_ns = vim.api.nvim_create_namespace 'MikasaDashboard'
-    vim.api.nvim_create_autocmd({ 'FileType', 'BufEnter', 'VimResized' }, {
-      pattern = { 'dashboard', '*' }, -- VimResized might fire when dashboard isn't the only thing, but we check inside
-      callback = function()
-        local buf = vim.api.nvim_get_current_buf()
-        if vim.bo[buf].filetype ~= 'dashboard' then
-          return
-        end
-
-        local function apply_rose_mikasa_colors()
-          if not vim.api.nvim_buf_is_valid(buf) or vim.bo[buf].filetype ~= 'dashboard' then
-            return
-          end
-
-          -- Clear existing highlights
-          vim.api.nvim_buf_clear_namespace(buf, mikasa_ns, 0, -1)
-
-          -- Rose Pine Flavors:
-          -- Yellow Shade 1 (Middle): Gold (#f6c177) -> @
-          -- Yellow Shade 2 (Brightest): Rose (#ebbcba) -> %
-          -- Yellow Shade 3 (Accent/Shadow): Iris (#c4a7e7) -> #, *
-          -- Blue: Pine (#31748f) -> +, =, -, :, .
-          vim.api.nvim_set_hl(0, 'MikasaGold', { fg = '#f6c177', bold = true, force = true })
-          vim.api.nvim_set_hl(0, 'MikasaRose', { fg = '#ebbcba', bold = true, force = true })
-          vim.api.nvim_set_hl(0, 'MikasaIris', { fg = '#c4a7e7', bold = true, force = true })
-          vim.api.nvim_set_hl(0, 'MikasaPine', { fg = '#31748f', bold = true, force = true })
-
-          local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-          for i, line in ipairs(lines) do
-            -- Shade 1 (Gold): @
-            local g1_start = 1
-            while true do
-              local s, e = line:find('@', g1_start)
-              if not s then break end
-              vim.api.nvim_buf_add_highlight(buf, mikasa_ns, 'MikasaGold', i - 1, s - 1, e)
-              g1_start = e + 1
-            end
-
-            -- Shade 2 (Rose): %
-            local g2_start = 1
-            while true do
-              local s, e = line:find('%%', g2_start)
-              if not s then break end
-              vim.api.nvim_buf_add_highlight(buf, mikasa_ns, 'MikasaRose', i - 1, s - 1, e)
-              g2_start = e + 1
-            end
-
-            -- Shade 3 (Iris): #, *
-            local gold3_chars = '[#%*]'
-            local g3_start = 1
-            while true do
-              local s, e = line:find(gold3_chars, g3_start)
-              if not s then break end
-              vim.api.nvim_buf_add_highlight(buf, mikasa_ns, 'MikasaIris', i - 1, s - 1, e)
-              g3_start = e + 1
-            end
-
-            -- Blue (Pine): +, =, -, :, .
-            local pine_chars = '[%+=%-%:%.]'
-            local p_start = 1
-            while true do
-              local s, e = line:find(pine_chars, p_start)
-              if not s then break end
-              vim.api.nvim_buf_add_highlight(buf, mikasa_ns, 'MikasaPine', i - 1, s - 1, e)
-              p_start = e + 1
-            end
-          end
-        end
-
-        -- Execute with multiple timings
-        apply_rose_mikasa_colors()
-        vim.schedule(apply_rose_mikasa_colors)
-        vim.defer_fn(apply_rose_mikasa_colors, 20)
-        vim.defer_fn(apply_rose_mikasa_colors, 100)
-        vim.defer_fn(apply_rose_mikasa_colors, 500)
-      end,
-    })
-  end,
-  dependencies = { { 'nvim-tree/nvim-web-devicons' } },
+    config = function(_, opts)
+      require('snacks').setup(opts)
+      local colors = {
+        MikasaGold = { fg = '#f6c177', bold = true },
+        MikasaRose = { fg = '#ebbcba', bold = true },
+        MikasaIris = { fg = '#c4a7e7', bold = true },
+        MikasaPine = { fg = '#31748f', bold = true },
+      }
+      for group, color in pairs(colors) do
+        vim.api.nvim_set_hl(0, group, color)
+      end
+    end,
+  },
 }
+
+
+
