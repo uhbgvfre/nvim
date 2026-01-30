@@ -169,7 +169,8 @@ vim.opt.termguicolors = true
 -- Neovide
 if vim.g.neovide then
   -- Put anything you want to happen only in Neovide here
-  vim.o.guifont = 'JetBrainsMono Nerd Font:h12'
+  vim.o.guifont = 'JetBrainsMono Nerd Font:h11'
+  vim.g.neovide_line_height = 0.9
   vim.g.neovide_cursor_vfx_mode = 'pixiedust'
   vim.g.neovide_cursor_vfx_particle_density = 3
   -- vim.g.neovide_cursor_vfx_particle_phase = 8
